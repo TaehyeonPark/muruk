@@ -65,6 +65,18 @@ def getdevices(username: str) -> list[str] | list:
     return devices[username]
 
 
+def getdevicedefault() -> dict:
+    return {
+        "preset": None,
+        "temperature": random.randint(20, 28),
+        "moisture": random.randint(35, 85),
+        "light": random.randint(300, 1200),
+        "lastwateredtime": None,
+        "noti": True,
+        "history": []
+    }
+
+
 @app.route("/", methods=["GET"])
 def index():
     if "username" not in session:
@@ -175,14 +187,7 @@ def registerdevice():
         username = session["username"]
 
         if username not in devices.keys() or devicecode not in devices[username]:
-            devices[username][devicecode] = {
-                "preset": None,
-                "temperature": random.randint(20, 28),
-                "moisture": random.randint(35, 85),
-                "light": random.randint(300, 1200),
-                "lastwateredtime": None,
-                "history": []
-            }
+            devices[username][devicecode] = getdevicedefault()
             flash('Successfully registered', 'message')
             return render_template("registerdevicesuccess.html"), 200
         else:
@@ -191,12 +196,10 @@ def registerdevice():
     return render_template("registerdevice.html"), 200
 
 
-@app.route('/registerdevicebyqr', methods=['GET'])
-def registerdevicebyqr():
+@app.route('/registerdevicebyqr/<string:devicecode>', methods=['GET'])
+def registerdevicebyqr(devicecode: str):
     if "username" not in session:
         return redirect(url_for("login")), 302
-
-    devicecode = request.args.get("devicecode")
 
     if not devicecode:
         return jsonify({'message': 'Device Code is required.'}), 400
@@ -204,14 +207,7 @@ def registerdevicebyqr():
     username = session["username"]
 
     if username not in devices.keys() or devicecode not in devices[username]:
-        devices[username][devicecode] = {
-            "preset": None,
-            "temperature": random.randint(20, 28),
-            "moisture": random.randint(35, 85),
-            "light": random.randint(300, 1200),
-            "lastwateredtime": None,
-            "history": []
-        }
+        devices[username][devicecode] = getdevicedefault()
         flash('Successfully registered', 'message')
         return render_template("registerdevicesuccess.html"), 200
     flash('Already registered device', 'message')
@@ -233,6 +229,35 @@ def setpreset(device: str, ):
 
     devices[username][device]["preset"] = preset
     return jsonify({'status': 200, 'message': 'Successfully set your preset', 'data': {'result': True}}), 200
+
+
+@app.route('/setnoti/<string:device>', methods=['GET'])
+def setnoti(device: str, ):
+    if "username" not in session:
+        return redirect(url_for("login")), 302
+
+    username = session["username"]
+    if username not in devices.keys() or device not in devices[username]:
+        return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': None}}), 200
+
+    noti_data = request.args.get('noti')
+    if noti_data.lower() not in ["true", "false"]:
+        return jsonify({'status': 200, 'message': 'No presets detected', 'data': {'result': None}}), 200
+
+    devices[username][device]["noti"] = noti_data.lower()
+    return jsonify({'status': 200, 'message': 'Successfully set your preset', 'data': {'result': noti_data.lower()}}), 200
+
+
+@app.route('/noti/<string:device>', methods=['GET'])
+def noti(device: str, ):
+    if "username" not in session:
+        return redirect(url_for("login")), 302
+
+    username = session["username"]
+    if username not in devices.keys() or device not in devices[username]:
+        return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': None}}), 200
+
+    return jsonify({'status': 200, 'message': 'Successfully set your preset', 'data': {'result': devices[username][device]["noti"]}}), 200
 
 
 @app.route('/listdevice', methods=['GET'])
@@ -274,8 +299,9 @@ def light(device: str):
     username = session["username"]
     if username not in devices.keys() or device not in devices[username]:
         return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': False}}), 200
-    time_sehdcule = request.args.get('time')
-    devices[username][device]["scheduledlighting"] = time_sehdcule
+    time_sehdcule_start = request.args.get('start')
+    time_sehdcule_end = request.args.get('end')
+    devices[username][device]["scheduledlighting"] = f"{time_sehdcule_start} ~ {time_sehdcule_end}"
     return jsonify({'status': 200, 'message': 'Successfully lighted your plant', 'data': {'result': True}}), 200
 
 
