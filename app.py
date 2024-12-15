@@ -77,6 +77,11 @@ def getdevicedefault() -> dict:
     }
 
 
+@app.route('/static/<path:path>')
+def servestaticfiles(path):
+    return send_from_directory('static', path)
+
+
 @app.route("/", methods=["GET"])
 def index():
     if "username" not in session:
@@ -349,6 +354,8 @@ def analyzedisease(device: str):
     if username not in devices.keys() or device not in devices[username]:
         return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': []}}), 200
     result = analyzediseasehandler(username, device)
+    result["plantName"] = presets[devices[username]
+                                  [device]["preset"]]["plantName"]
     return jsonify({'status': 200, 'message': 'Successfully loaded your devices', 'data': {'result': result}}), 200
 
 
