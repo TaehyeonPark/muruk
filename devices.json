@@ -1,5 +1,18 @@
 {
   "test@test": {
+    "RM194QV2": {
+      "preset": "preset002",
+      "temperature": 26,
+      "moisture": 65,
+      "light": 996,
+      "lastwateredtime": "2024-12-16 04:30:00",
+      "scheduledlighting": "03:00 ~ 11:00",
+      "noti": true,
+      "history": [
+        "[2024-12-16 04:30:00] - Watering event",
+        "[2024-12-16 04:15:00] - Lighting event"
+      ]
+    },
     "device1": {
       "preset": "preset001",
       "temperature": 22,

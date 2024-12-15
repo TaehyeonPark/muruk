@@ -428,20 +428,23 @@
         function generateFakeData() {
           const labels = Array.from({ length: 10 }, (_, i) => {
             const date = new Date();
-            date.setDate(date.getDate() - (10 - i)); // 10일 전부터 오늘까지
+            date.setHours(date.getHours() - (10 - i));
             return date;
+            // const date = new Date();
+            // date.setDate(date.getDate() - (10 - i)); // 10일 전부터 오늘까지
+            // return date;
           });
           const temp = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 15) + 15
+            (_, i) => Math.floor(Math.random() * 4) + 4 - i / 2
           );
           const humidity = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 50) + 30
+            (_, i) => Math.floor(Math.random() * 20) + 40 - i * 2
           );
           const light = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 500) + 500
+            (_, i) => Math.floor(Math.random() * 100) + 100 - i * 5
           );
           return { labels, temp, humidity, light };
         }
