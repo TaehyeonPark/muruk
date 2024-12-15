@@ -2,26 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Forgot Password</title>
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <style>
+      body {
+        background-color: #f8f9fa; /* 연한 회색 배경 */
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .forgot-password-card {
+        width: 100%;
+        max-width: 400px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .forgot-password-card h2 {
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: #333333;
+      }
+
+      .forgot-password-card p {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+
+      .forgot-password-card .form-control {
+        border-radius: 8px;
+      }
+
+      .forgot-password-card .btn {
+        border-radius: 8px;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .back-to-login {
+        margin-top: 15px;
+        display: block;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .back-to-login:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
-    <div class="container mt-5">
-      <div class="text-center">
-        <h2>Forgot Password</h2>
-        <p class="text-muted">
-          Enter your registered email address, and we will send you a link to
-          reset your password.
-        </p>
-      </div>
+    <div class="forgot-password-card">
+      <h2>Forgot Password</h2>
+      <p>
+        Enter your registered email address, and we will send you a link to
+        reset your password.
+      </p>
       <form method="POST" action="/send-reset-link">
         <div class="form-group">
-          <label for="email">Email Address</label>
           <input
             type="email"
             class="form-control"
@@ -31,13 +80,9 @@
             required
           />
         </div>
-        <button type="submit" class="btn btn-primary btn-block">
-          Send Reset Link
-        </button>
+        <button type="submit" class="btn btn-primary">Send Reset Link</button>
       </form>
-      <div class="text-center mt-3">
-        <a href="/login" class="text-decoration-none">Back to Login</a>
-      </div>
+      <a href="/login" class="back-to-login">Back to Login</a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

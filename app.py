@@ -184,11 +184,38 @@ def registerdevice():
                 "history": []
             }
             flash('Successfully registered', 'message')
-            return redirect(url_for("index")), 302
+            return render_template("registerdevicesuccess.html"), 200
         else:
             flash('Already registered device', 'message')
             return redirect(url_for("registerdevice")), 302
     return render_template("registerdevice.html"), 200
+
+
+@app.route('/registerdevicebyqr', methods=['GET'])
+def registerdevicebyqr():
+    if "username" not in session:
+        return redirect(url_for("login")), 302
+
+    devicecode = request.args.get("devicecode")
+
+    if not devicecode:
+        return jsonify({'message': 'Device Code is required.'}), 400
+
+    username = session["username"]
+
+    if username not in devices.keys() or devicecode not in devices[username]:
+        devices[username][devicecode] = {
+            "preset": None,
+            "temperature": random.randint(20, 28),
+            "moisture": random.randint(35, 85),
+            "light": random.randint(300, 1200),
+            "lastwateredtime": None,
+            "history": []
+        }
+        flash('Successfully registered', 'message')
+        return render_template("registerdevicesuccess.html"), 200
+    flash('Already registered device', 'message')
+    return redirect(url_for("registerdevice")), 302
 
 
 @app.route('/setpreset/<string:device>', methods=['GET'])
@@ -259,7 +286,9 @@ def scheduledlight(device: str):
     username = session["username"]
     if username not in devices.keys() or device not in devices[username]:
         return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': None}}), 200
-    result = devices[username][device]["scheduledlighting"]
+    result = devices[username][device].get("scheduledlighting", "")
+    if result == "":
+        return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': None}}), 200
     return jsonify({'status': 200, 'message': 'Successfully loaded your lighting schedule', 'data': {'result': result}}), 200
 
 

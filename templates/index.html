@@ -20,7 +20,23 @@
         margin-left: 10px;
       }
       .container {
-        max-width: 1250px; /* 원하는 만큼 늘려서 조정 (예: 1200px, 1400px 등) */
+        max-width: 800px; /* 원하는 만큼 늘려서 조정 (예: 1200px, 1400px 등) */
+      }
+      .device-card {
+        background-color: #f8f9fa; /* 연한 회색 배경 */
+        margin-bottom: 20px; /* 카드 사이 간격 */
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .device-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+      }
+      .device-actions button {
+        margin-right: 5px;
       }
     </style>
   </head>
@@ -35,30 +51,17 @@
       </div>
       <h3>Your Devices</h3>
       {% if devices %}
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Device ID</th>
-            <th>Plant Name</th>
-            <th>Preset</th>
-            <th>Temperature (°C)</th>
-            <th>Moisture (%)</th>
-            <th>Light (lux)</th>
-            <th>Last Watered</th>
-            <th>Scheduled Light</th>
-            <!-- 새로 추가한 컬럼 -->
-            <th>Actions</th>
-            <th>History</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for device in devices %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ device.device_id }}</td>
-            <td>{{ device.plant_name }}</td>
-            <td>
+      <!-- 카드 형식으로 디바이스 정보 출력 -->
+      <div class="row">
+        {% for device in devices %}
+        <div class="col-12">
+          <div class="device-card">
+            <div class="device-header">
+              <strong>Device ID:</strong> {{ device.device_id }}
+            </div>
+            <p><strong>Plant Name:</strong> {{ device.plant_name }}</p>
+            <p>
+              <strong>Preset:</strong>
               <select
                 class="form-control preset-select"
                 data-device-id="{{ device.device_id }}"
@@ -70,51 +73,49 @@
                 <option value="preset004">Snake Plant</option>
                 <option value="preset005">Peace Lily</option>
               </select>
-            </td>
-            <td>{{ device.current_temp }}</td>
-            <td>{{ device.current_moisture }}</td>
-            <td>{{ device.current_light }}</td>
-            <td>{{ device.last_watered }}</td>
-            <td
-              class="scheduled-light-cell"
-              data-device-id="{{ device.device_id }}"
-            >
-              Loading...
-            </td>
-            <td>
-              <div class="btn-group" role="group" aria-label="Device Actions">
-                <button
-                  class="btn btn-primary btn-sm analyze-disease-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Analyze Disease
-                </button>
-                <button
-                  class="btn btn-success btn-sm water-plant-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Water Plant
-                </button>
-                <button
-                  class="btn btn-warning btn-sm light-schedule-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Light Schedule
-                </button>
-              </div>
-            </td>
-            <td>
+            </p>
+            <p><strong>Temperature (°C):</strong> {{ device.current_temp }}</p>
+            <p><strong>Moisture (%):</strong> {{ device.current_moisture }}</p>
+            <p><strong>Light (lux):</strong> {{ device.current_light }}</p>
+            <p><strong>Last Watered:</strong> {{ device.last_watered }}</p>
+            <p>
+              <strong>Scheduled Light:</strong>
+              <span
+                class="scheduled-light-cell"
+                data-device-id="{{ device.device_id }}"
+                >Loading...</span
+              >
+            </p>
+            <div class="device-actions">
+              <button
+                class="btn btn-primary btn-sm analyze-disease-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Analyze Disease
+              </button>
+              <button
+                class="btn btn-success btn-sm water-plant-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Water Plant
+              </button>
+              <button
+                class="btn btn-warning btn-sm light-schedule-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Light Schedule
+              </button>
               <button
                 class="btn btn-info btn-sm view-history-btn"
                 data-device-id="{{ device.device_id }}"
               >
                 View History
               </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
       {% else %}
       <div class="alert alert-warning">
         No devices found. <a href="/registerdevice">Register a device</a>
