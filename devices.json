@@ -1,0 +1,48 @@
+{
+  "test": {
+    "device1": {
+      "preset": "preset001",
+      "temperature": 22,
+      "moisture": 50,
+      "light": 500,
+      "lastwateredtime": "2024-12-15 10:30:00",
+      "scheduledlighting": "10:30",
+      "history": [
+        "[2024-12-15 10:30:00] - Watering event",
+        "[2024-12-14 16:00:00] - Lighting event",
+        "[2024-12-13 09:00:00] - General maintenance check",
+        "[2024-12-12 14:45:00] - Fertilizer added",
+        "[2024-12-11 18:30:00] - Temperature adjustment to 22°C",
+        "[2024-12-10 10:15:00] - Watering event",
+        "[2024-12-09 12:00:00] - Lighting event",
+        "[2024-12-08 16:45:00] - Moisture sensor recalibrated",
+        "[2024-12-07 11:00:00] - General maintenance check",
+        "[2024-12-06 14:00:00] - Watering event",
+        "[2024-12-05 15:30:00] - Fertilizer added",
+        "[2024-12-04 10:30:00] - Lighting event"
+      ]
+    },
+    "device2": {
+      "preset": "preset002",
+      "temperature": 25,
+      "moisture": 20,
+      "light": 1000,
+      "lastwateredtime": "2024-12-14 16:00:00",
+      "scheduledlighting": "16:00",
+      "history": [
+        "[2024-12-14 16:00:00] - Watering event",
+        "[2024-12-14 13:00:00] - Lighting event",
+        "[2024-12-13 11:45:00] - Fertilizer added",
+        "[2024-12-12 09:30:00] - General maintenance check",
+        "[2024-12-11 14:15:00] - Temperature adjustment to 25°C",
+        "[2024-12-10 10:45:00] - Lighting event",
+        "[2024-12-09 16:20:00] - Watering event",
+        "[2024-12-08 08:30:00] - Moisture sensor recalibrated",
+        "[2024-12-07 15:00:00] - Lighting event",
+        "[2024-12-06 12:30:00] - Watering event",
+        "[2024-12-05 10:15:00] - Fertilizer added",
+        "[2024-12-04 11:45:00] - General maintenance check"
+      ]
+    }
+  }
+}

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My SmartFarm Devices</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .top-bar .action-buttons a {
+        margin-left: 10px;
+      }
+      .container {
+        max-width: 1250px; /* 원하는 만큼 늘려서 조정 (예: 1200px, 1400px 등) */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="top-bar">
+        <h2>Welcome, {{ username }}</h2>
+        <div class="action-buttons">
+          <a href="/registerdevice" class="btn btn-success">Register Device</a>
+          <a href="/logout" class="btn btn-danger">Logout</a>
+        </div>
+      </div>
+      <h3>Your Devices</h3>
+      {% if devices %}
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Device ID</th>
+            <th>Plant Name</th>
+            <th>Preset</th>
+            <th>Temperature (°C)</th>
+            <th>Moisture (%)</th>
+            <th>Light (lux)</th>
+            <th>Last Watered</th>
+            <th>Scheduled Light</th>
+            <!-- 새로 추가한 컬럼 -->
+            <th>Actions</th>
+            <th>History</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for device in devices %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ device.device_id }}</td>
+            <td>{{ device.plant_name }}</td>
+            <td>
+              <select
+                class="form-control preset-select"
+                data-device-id="{{ device.device_id }}"
+              >
+                <option value="" disabled selected>Select a preset</option>
+                <option value="preset001">Ficus</option>
+                <option value="preset002">Succulent</option>
+                <option value="preset003">Orchid</option>
+                <option value="preset004">Snake Plant</option>
+                <option value="preset005">Peace Lily</option>
+              </select>
+            </td>
+            <td>{{ device.current_temp }}</td>
+            <td>{{ device.current_moisture }}</td>
+            <td>{{ device.current_light }}</td>
+            <td>{{ device.last_watered }}</td>
+            <td
+              class="scheduled-light-cell"
+              data-device-id="{{ device.device_id }}"
+            >
+              Loading...
+            </td>
+            <td>
+              <div class="btn-group" role="group" aria-label="Device Actions">
+                <button
+                  class="btn btn-primary btn-sm analyze-disease-btn"
+                  data-device-id="{{ device.device_id }}"
+                >
+                  Analyze Disease
+                </button>
+                <button
+                  class="btn btn-success btn-sm water-plant-btn"
+                  data-device-id="{{ device.device_id }}"
+                >
+                  Water Plant
+                </button>
+                <button
+                  class="btn btn-warning btn-sm light-schedule-btn"
+                  data-device-id="{{ device.device_id }}"
+                >
+                  Light Schedule
+                </button>
+              </div>
+            </td>
+            <td>
+              <button
+                class="btn btn-info btn-sm view-history-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                View History
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="alert alert-warning">
+        No devices found. <a href="/registerdevice">Register a device</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Disease Analysis Modal -->
+    <div
+      class="modal fade"
+      id="diseaseAnalysisModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="diseaseAnalysisModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="diseaseAnalysisModalLabel">
+              Disease Analysis Result
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="loading" style="text-align: center">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p>Analyzing disease...</p>
+            </div>
+            <div id="analysis-result" style="display: none">
+              <p><strong>Evaluation:</strong> <span id="evaluation"></span></p>
+              <p>
+                <strong>Health Percentage:</strong>
+                <span id="healthPercentage"></span>%
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Modal -->
+    <div
+      class="modal fade"
+      id="historyModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="historyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="historyModalLabel">Device History</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul id="history-list" class="list-group"></ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Light Schedule Modal -->
+    <div
+      class="modal fade"
+      id="lightScheduleModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="lightScheduleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="lightScheduleModalLabel">
+              Set Light Schedule
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="lightScheduleForm">
+              <div class="form-group">
+                <label for="lightTime">Select time to turn on light:</label>
+                <input
+                  type="time"
+                  class="form-control"
+                  id="lightTime"
+                  required
+                />
+              </div>
+              <input type="hidden" id="lightScheduleDeviceId" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="saveLightScheduleBtn"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Generic function to handle actions
+        function handleAction(url, modalTitle, updateModal = false) {
+          const modal = $("#diseaseAnalysisModal");
+          const modalBody = document.querySelector(
+            "#diseaseAnalysisModal .modal-body"
+          );
+          const modalTitleElement = document.getElementById(
+            "diseaseAnalysisModalLabel"
+          );
+
+          modalBody.innerHTML = `
+            <div id="loading" style="text-align: center;">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p>Loading...</p>
+            </div>
+          `;
+          modalTitleElement.textContent = modalTitle;
+          modal.modal("show");
+
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              if (
+                data.status === 200 &&
+                data.data &&
+                data.data.result !== null &&
+                data.data.result !== undefined
+              ) {
+                if (updateModal) {
+                  modalBody.innerHTML = `
+                    <div id="analysis-result">
+                      <p><strong>Evaluation:</strong> ${data.data.result.evaluation}</p>
+                      <p><strong>Health Percentage:</strong> ${data.data.result.healthPercentage}%</p>
+                    </div>
+                  `;
+                } else {
+                  modalBody.innerHTML = `
+                    <div class="alert alert-success" role="alert">
+                      ${data.message}
+                    </div>
+                  `;
+                }
+              } else {
+                modalBody.innerHTML = `
+                  <div class="alert alert-danger" role="alert">
+                    ${data.message || "Action failed."}
+                  </div>
+                `;
+              }
+            })
+            .catch((error) => {
+              console.error("Error performing action:", error);
+              modalBody.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                  An error occurred. Please try again.
+                </div>
+              `;
+            });
+        }
+
+        // Analyze Disease
+        document.querySelectorAll(".analyze-disease-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const deviceId = button.getAttribute("data-device-id");
+            handleAction(
+              `/analyzedisease/${deviceId}`,
+              "Disease Analysis Result",
+              true
+            );
+          });
+        });
+
+        // Water Plant
+        document.querySelectorAll(".water-plant-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const deviceId = button.getAttribute("data-device-id");
+            handleAction(`/water/${deviceId}`, "Watering Result");
+          });
+        });
+
+        // Light Schedule
+        document.querySelectorAll(".light-schedule-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const deviceId = button.getAttribute("data-device-id");
+            document.getElementById("lightScheduleDeviceId").value = deviceId;
+            $("#lightScheduleModal").modal("show");
+          });
+        });
+
+        // History
+        document.querySelectorAll(".view-history-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const deviceId = button.getAttribute("data-device-id");
+            const historyList = document.getElementById("history-list");
+            const modalTitle = document.getElementById("historyModalLabel");
+
+            historyList.innerHTML = `
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <p>Loading history...</p>
+            `;
+            modalTitle.textContent = `History for ${deviceId}`;
+            $("#historyModal").modal("show");
+
+            fetch(`/history/${deviceId}`)
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 200 && data.data && data.data.result) {
+                  const history = data.data.result;
+                  historyList.innerHTML = history
+                    .map((entry) => `<li class="list-group-item">${entry}</li>`)
+                    .join("");
+                } else {
+                  historyList.innerHTML = `
+                    <div class="alert alert-warning" role="alert">
+                      No history available for this device.
+                    </div>
+                  `;
+                }
+              })
+              .catch((error) => {
+                console.error("Error fetching history:", error);
+                historyList.innerHTML = `
+                  <div class="alert alert-danger" role="alert">
+                    Failed to load history. Please try again later.
+                  </div>
+                `;
+              });
+          });
+        });
+
+        // Preset 설정
+        document.querySelectorAll(".preset-select").forEach((select) => {
+          select.addEventListener("change", () => {
+            const deviceId = select.getAttribute("data-device-id");
+            const selectedPreset = select.value;
+
+            if (!selectedPreset) {
+              alert("Please select a preset.");
+              return;
+            }
+
+            fetch(`/setpreset/${deviceId}?preset=${selectedPreset}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 200 && data.data && data.data.result) {
+                  alert("Preset updated successfully!");
+                } else {
+                  alert(`Failed to update preset: ${data.message}`);
+                }
+              })
+              .catch((error) => {
+                console.error("Error updating preset:", error);
+                alert("Error occurred while updating preset.");
+              });
+          });
+        });
+
+        // Light Schedule 설정
+        document
+          .getElementById("saveLightScheduleBtn")
+          .addEventListener("click", () => {
+            const deviceId = document.getElementById(
+              "lightScheduleDeviceId"
+            ).value;
+            const lightTime = document.getElementById("lightTime").value;
+
+            if (!lightTime) {
+              alert("Please select a time.");
+              return;
+            }
+
+            fetch(
+              `/lightschedule/${deviceId}?time=${encodeURIComponent(
+                lightTime
+              )}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 200 && data.data && data.data.result) {
+                  alert("Light schedule set successfully!");
+                  $("#lightScheduleModal").modal("hide");
+                } else {
+                  alert(`Failed to set light schedule: ${data.message}`);
+                }
+              })
+              .catch((error) => {
+                console.error("Error setting light schedule:", error);
+                alert("Error occurred while setting light schedule.");
+              });
+          });
+
+        // Scheduled Light 표시 로직
+        const scheduledCells = document.querySelectorAll(
+          ".scheduled-light-cell"
+        );
+        scheduledCells.forEach((cell) => {
+          const deviceId = cell.getAttribute("data-device-id");
+          fetch(`/scheduledlight/${deviceId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (
+                data.status === 200 &&
+                data.data &&
+                data.data.result !== null &&
+                data.data.result !== undefined
+              ) {
+                cell.textContent = data.data.result;
+              } else {
+                cell.textContent = "No schedule set";
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching scheduled light:", error);
+              cell.textContent = "None";
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

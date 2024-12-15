@@ -1,0 +1,26 @@
+[
+  {
+    "healthPercentage": 95,
+    "evaluation": "Excellent"
+  },
+  {
+    "healthPercentage": 85,
+    "evaluation": "Good"
+  },
+  {
+    "healthPercentage": 70,
+    "evaluation": "Fair"
+  },
+  {
+    "healthPercentage": 55,
+    "evaluation": "Poor"
+  },
+  {
+    "healthPercentage": 40,
+    "evaluation": "Critical"
+  },
+  {
+    "healthPercentage": 35,
+    "evaluation": "Severe"
+  }
+]

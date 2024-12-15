@@ -1,0 +1,57 @@
+{
+  "preset001": {
+    "plantName": "Ficus",
+    "minTemp": 15,
+    "maxTemp": 25,
+    "minMoisture": 40,
+    "maxMoisture": 70,
+    "minLight": 300,
+    "maxLight": 800,
+    "minFloweringDarkness": 12,
+    "optimalWaterAmount": 500
+  },
+  "preset002": {
+    "plantName": "Succulent",
+    "minTemp": 18,
+    "maxTemp": 30,
+    "minMoisture": 10,
+    "maxMoisture": 30,
+    "minLight": 800,
+    "maxLight": 1200,
+    "minFloweringDarkness": 10,
+    "optimalWaterAmount": 200
+  },
+  "preset003": {
+    "plantName": "Orchid",
+    "minTemp": 16,
+    "maxTemp": 24,
+    "minMoisture": 50,
+    "maxMoisture": 80,
+    "minLight": 400,
+    "maxLight": 600,
+    "minFloweringDarkness": 14,
+    "optimalWaterAmount": 300
+  },
+  "preset004": {
+    "plantName": "Snake Plant",
+    "minTemp": 10,
+    "maxTemp": 35,
+    "minMoisture": 20,
+    "maxMoisture": 50,
+    "minLight": 100,
+    "maxLight": 800,
+    "minFloweringDarkness": 8,
+    "optimalWaterAmount": 250
+  },
+  "preset005": {
+    "plantName": "Peace Lily",
+    "minTemp": 18,
+    "maxTemp": 27,
+    "minMoisture": 60,
+    "maxMoisture": 90,
+    "minLight": 300,
+    "maxLight": 700,
+    "minFloweringDarkness": 12,
+    "optimalWaterAmount": 400
+  }
+}
