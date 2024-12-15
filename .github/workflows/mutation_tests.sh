@@ -6,5 +6,5 @@ echo "Current working directory: $(pwd)"
 cd "$(dirname "$0")/../../"
 
 echo "Running mutation tests..."
-mutatest -s .\tests\ -t "pytest" -r 314
+mutatest -s $TEST_DIR -t "pytest" -r 314
 echo "All tests passed!"
