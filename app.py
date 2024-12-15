@@ -77,12 +77,19 @@ def getdevicedefault() -> dict:
     }
 
 
+@app.route('/static/<path:path>')
+def servestaticfiles(path):
+    return send_from_directory('static', path)
+
+
 @app.route("/", methods=["GET"])
 def index():
     if "username" not in session:
         return redirect(url_for("login")), 302
 
     username = session["username"]
+    if username == "admin@muruk":
+        return render_template("admin.html"), 200
     user_devices = devices.get(username, {})
 
     enriched_devices = []
@@ -115,10 +122,20 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if "username" in session:
+        username = session["username"]
+        if username == "admin@muruk":
+            return render_template("admin.html"), 200
         return redirect(url_for("index"))
     if request.method == "POST":
         username = request.form.get("username")
         password = strhashcode(request.form.get("password"))
+
+        if username == "admin@muruk" and users[username] == password:
+            session["username"] = username
+            return render_template(
+                "admin.html",
+                username=username,
+            ), 200
 
         if username in users and users[username] == password:
             session["username"] = username
@@ -129,6 +146,65 @@ def login():
         return render_template("login.html"), 401
 
     return render_template("login.html"), 200
+
+
+@app.route('/listpreset', methods=['GET'])
+def listpreset():
+    return jsonify({'status': 200, 'message': 'Successfully loaded the presets', 'data': {'presets': presets}}), 200
+
+
+@app.route('/registerpreset', methods=['POST'])
+def registerpreset():
+    if "username" not in session:
+        return redirect(url_for("login")), 302
+    username = session["username"]
+    if username != "admin@muruk":
+        return redirect(url_for("index")), 302
+
+    data = request.json
+
+    preset_id = data.get("preset_id")
+    if not preset_id or preset_id in presets.keys():
+        return jsonify({'status': 400, 'message': 'Invalid or duplicate preset ID'}), 400
+
+    required_fields = ["plantName", "minTemp", "maxTemp", "minMoisture", "maxMoisture",
+                       "minLight", "maxLight", "minFloweringDarkness", "optimalWaterAmount"]
+    if not all(field in data for field in required_fields):
+        return jsonify({'status': 400, 'message': 'Missing required fields'}), 400
+
+    presets[preset_id] = {
+        "plantName": data["plantName"],
+        "minTemp": data["minTemp"],
+        "maxTemp": data["maxTemp"],
+        "minMoisture": data["minMoisture"],
+        "maxMoisture": data["maxMoisture"],
+        "minLight": data["minLight"],
+        "maxLight": data["maxLight"],
+        "minFloweringDarkness": data["minFloweringDarkness"],
+        "optimalWaterAmount": data["optimalWaterAmount"],
+    }
+
+    return jsonify({'status': 200, 'message': 'Preset registered successfully'}), 200
+
+
+@app.route('/updatepreset/<string:preset_id>', methods=['POST'])
+def updatepreset(preset_id):
+    if "username" not in session:
+        return redirect(url_for("login")), 302
+
+    username = session["username"]
+    if username != "admin@muruk":
+        return redirect(url_for("index")), 302
+
+    if preset_id not in presets:
+        return jsonify({'status': 404, 'message': 'Preset not found'}), 404
+
+    data = request.json
+    for key, value in data.items():
+        if key in presets[preset_id]:
+            presets[preset_id][key] = value
+
+    return jsonify({'status': 200, 'message': 'Preset updated successfully'}), 200
 
 
 @app.route("/logout")
@@ -278,6 +354,8 @@ def analyzedisease(device: str):
     if username not in devices.keys() or device not in devices[username]:
         return jsonify({'status': 200, 'message': 'No devices detected', 'data': {'result': []}}), 200
     result = analyzediseasehandler(username, device)
+    result["plantName"] = presets[devices[username]
+                                  [device]["preset"]]["plantName"]
     return jsonify({'status': 200, 'message': 'Successfully loaded your devices', 'data': {'result': result}}), 200
 
 

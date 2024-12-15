@@ -108,7 +108,7 @@
   <body>
     <div class="container mt-5">
       <div class="top-bar">
-        <h2>Welcome, {{ username }}</h2>
+        <h2>Welcome, <strong>{{ username }}!</strong></h2>
         <div class="action-buttons">
           <a href="/registerdevice" class="btn btn-success">Register Device</a>
           <a href="/logout" class="btn btn-danger">Logout</a>
@@ -146,11 +146,7 @@
                 <option value="" disabled selected>
                   Currrent preset: {{ device.plant_name }}
                 </option>
-                <option value="preset001">Ficus</option>
-                <option value="preset002">Succulent</option>
-                <option value="preset003">Orchid</option>
-                <option value="preset004">Snake Plant</option>
-                <option value="preset005">Peace Lily</option>
+                <option value="" disabled selected>Loading presets...</option>
               </select>
             </p>
             <p><strong>Temperature (°C):</strong> {{ device.current_temp }}</p>
@@ -432,29 +428,32 @@
         function generateFakeData() {
           const labels = Array.from({ length: 10 }, (_, i) => {
             const date = new Date();
-            date.setDate(date.getDate() - (10 - i)); // 10일 전부터 오늘까지
+            date.setHours(date.getHours() - (10 - i));
             return date;
+            // const date = new Date();
+            // date.setDate(date.getDate() - (10 - i)); // 10일 전부터 오늘까지
+            // return date;
           });
           const temp = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 15) + 15
+            (_, i) => Math.floor(Math.random() * 2) + 21 - i / 4
           );
           const humidity = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 50) + 30
+            (_, i) => Math.floor(Math.random() * 20) + 40 - i * 2
           );
           const light = Array.from(
             { length: 10 },
-            () => Math.floor(Math.random() * 500) + 500
+            (_, i) => Math.floor(Math.random() * 100) + 100 - i * 5
           );
           return { labels, temp, humidity, light };
         }
 
         // D3.js 차트 그리기 함수
         function drawD3Chart(containerId, labels, data, label) {
-          const width = 600;
-          const height = 300;
-          const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+          const width = 600; // 전체 너비
+          const height = 300; // 전체 높이
+          const margin = { top: 20, right: 50, bottom: 60, left: 40 };
 
           // Clear previous chart
           d3.select(`#${containerId}`).html("");
@@ -475,27 +474,22 @@
           const svg = d3
             .select(`#${containerId}`)
             .append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .style("max-width", "100%")
+            .attr("viewBox", `0 0 ${width} ${height}`) // SVG 크기 유연하게 설정
+            .attr("preserveAspectRatio", "xMidYMid meet") // 비율 유지 및 가운데 정렬
+            .style("width", "100%") // 부모 컨테이너에 맞추기
             .style("height", "auto");
 
           // X축 추가
           svg
             .append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
-            .call(
-              d3
-                .axisBottom(x)
-                .ticks(width / 80)
-                .tickSizeOuter(0)
-            );
+            .call(d3.axisBottom(x).ticks(5).tickSizeOuter(0));
 
           // Y축 추가
           svg
             .append("g")
             .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y).ticks(height / 40));
+            .call(d3.axisLeft(y).ticks(5));
 
           // 라인 생성
           const line = d3
@@ -517,7 +511,7 @@
             .attr("x", margin.left)
             .attr("y", margin.top - 5)
             .attr("fill", "black")
-            .attr("text-anchor", "start")
+            .attr("font-weight", "bold")
             .text(label);
         }
       });
@@ -633,11 +627,59 @@
         document.querySelectorAll(".analyze-disease-btn").forEach((button) => {
           button.addEventListener("click", () => {
             const deviceId = button.getAttribute("data-device-id");
-            handleAction(
-              `/analyzedisease/${deviceId}`,
-              "Disease Analysis Result",
-              true
+            const modalBody = document.querySelector(
+              "#diseaseAnalysisModal .modal-body"
             );
+
+            // 초기 로딩 메시지 설정
+            modalBody.innerHTML = `
+              <div id="loading" style="text-align: center;">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <p>Analyzing disease...</p>
+              </div>
+            `;
+
+            // 모달 보여주기
+            $("#diseaseAnalysisModal").modal("show");
+
+            // 백엔드로부터 데이터 가져오기
+            fetch(`/analyzedisease/${deviceId}`)
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 200 && data.data && data.data.result) {
+                  // Plant Name에 따라 이미지 경로 설정
+                  console.log(data.data.result);
+                  const plantName = data.data.result.plantName;
+                  const imageName = plantName.replace(/\s+/g, "_") + ".png"; // 공백을 _로 치환
+                  const imagePath = `/static/${imageName}`;
+
+                  // 이미지와 결과 메시지를 보여주기
+                  modalBody.innerHTML = `
+                    <div style="text-align: center;">
+                      <img src="${imagePath}" alt="${plantName}" style="max-width: 100%; height: auto; margin-bottom: 10px;" />
+                      <p><strong>Evaluation:</strong> ${data.data.result.evaluation}</p>
+                      <p><strong>Health Percentage:</strong> ${data.data.result.healthPercentage}%</p>
+                    </div>
+                  `;
+                } else {
+                  // 실패 메시지
+                  modalBody.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                      ${data.message || "Disease analysis failed."}
+                    </div>
+                  `;
+                }
+              })
+              .catch((error) => {
+                console.error("Error performing analysis:", error);
+                modalBody.innerHTML = `
+                  <div class="alert alert-danger" role="alert">
+                    An error occurred while analyzing the disease. Please try again.
+                  </div>
+                `;
+              });
           });
         });
 
@@ -803,6 +845,45 @@
               cell.textContent = "None";
             });
         });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        // Load presets from server
+        fetch("/listpreset")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === 200 && data.data.presets) {
+              populatePresets(data.data.presets);
+            } else {
+              console.error("Failed to load presets");
+            }
+          })
+          .catch((err) => console.error("Error fetching presets:", err));
+
+        function populatePresets(presets) {
+          // Select all preset dropdowns
+          const presetSelects = document.querySelectorAll(".preset-select");
+
+          presetSelects.forEach((select) => {
+            // Clear existing options
+            select.innerHTML = "";
+
+            // Add a default option
+            const defaultOption = document.createElement("option");
+            defaultOption.textContent = "Select a preset";
+            defaultOption.value = "";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+
+            // Populate options with data
+            Object.entries(presets).forEach(([key, value]) => {
+              const option = document.createElement("option");
+              option.value = key;
+              option.textContent = value.plantName;
+              select.appendChild(option);
+            });
+          });
+        }
       });
     </script>
   </body>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Manage Presets</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Admin - Manage Presets</h2>
+
+      <!-- Register Preset Form -->
+      <div class="card mb-4">
+        <div class="card-header">Register New Preset</div>
+        <div class="card-body">
+          <form id="registerPresetForm">
+            <div class="form-group">
+              <label for="preset_id">Preset ID</label>
+              <input type="text" class="form-control" id="preset_id" required />
+            </div>
+            <div class="form-group">
+              <label for="plantName">Plant Name</label>
+              <input type="text" class="form-control" id="plantName" required />
+            </div>
+            <!-- Additional Fields -->
+            <div class="form-row">
+              <div class="col">
+                <label>Min Temp (°C)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="minTemp"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Max Temp (°C)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxTemp"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Min Moisture (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="minMoisture"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Max Moisture (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxMoisture"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row mt-2">
+              <div class="col">
+                <label>Min Light (LUX)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="minLight"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Max Light (LUX)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxLight"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Min Flowering Darkness (LUX)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="minFloweringDarkness"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label>Optimal Water Amount (mL)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="optimalWaterAmount"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              Register Preset
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Update Preset Form -->
+      <div class="card">
+        <div class="card-header">Update Existing Preset</div>
+        <div class="card-body">
+          <form id="updatePresetForm">
+            <div class="form-group">
+              <label for="updatePresetId">Preset ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="updatePresetId"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="updateField">Field to Update</label>
+              <select class="form-control" id="updateField">
+                <option value="plantName">Plant Name</option>
+                <option value="minTemp">Min Temp</option>
+                <option value="maxTemp">Max Temp</option>
+                <option value="minMoisture">Min Moisture</option>
+                <option value="maxMoisture">Max Moisture</option>
+                <option value="minLight">Min Light</option>
+                <option value="maxLight">Max Light</option>
+                <option value="optimalWaterAmount">Optimal Water Amount</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="updateValue">New Value</label>
+              <input
+                type="text"
+                class="form-control"
+                id="updateValue"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-warning mt-3">
+              Update Preset
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerPresetForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const data = {
+            preset_id: document.getElementById("preset_id").value,
+            plantName: document.getElementById("plantName").value,
+            minTemp: document.getElementById("minTemp").value,
+            maxTemp: document.getElementById("maxTemp").value,
+            minMoisture: document.getElementById("minMoisture").value,
+            maxMoisture: document.getElementById("maxMoisture").value,
+            minLight: document.getElementById("minLight").value,
+            maxLight: document.getElementById("maxLight").value,
+            minFloweringDarkness: document.getElementById(
+              "minFloweringDarkness"
+            ).value,
+            optimalWaterAmount:
+              document.getElementById("optimalWaterAmount").value,
+          };
+
+          fetch("/registerpreset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then((data) => alert(data.message));
+        });
+
+      document
+        .getElementById("updatePresetForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const presetId = document.getElementById("updatePresetId").value;
+          const field = document.getElementById("updateField").value;
+          const value = document.getElementById("updateValue").value;
+
+          fetch(`/updatepreset/${presetId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ [field]: value }),
+          })
+            .then((res) => res.json())
+            .then((data) => alert(data.message));
+        });
+    </script>
+  </body>
+</html>
