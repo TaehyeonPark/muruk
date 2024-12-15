@@ -109,7 +109,7 @@ def test_login_empty_fields2(client):
 
 def test_login_short_credentials2(client):
     response = client.post(
-        "/login", data={"username": "ab", "password": "1234"})
+        "/login", data={"username": "ab", "password": "12345"})
     assert response.status_code == 401
 
 
