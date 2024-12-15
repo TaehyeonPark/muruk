@@ -146,11 +146,7 @@
                 <option value="" disabled selected>
                   Currrent preset: {{ device.plant_name }}
                 </option>
-                <option value="preset001">Ficus</option>
-                <option value="preset002">Succulent</option>
-                <option value="preset003">Orchid</option>
-                <option value="preset004">Snake Plant</option>
-                <option value="preset005">Peace Lily</option>
+                <option value="" disabled selected>Loading presets...</option>
               </select>
             </p>
             <p><strong>Temperature (°C):</strong> {{ device.current_temp }}</p>
@@ -803,6 +799,45 @@
               cell.textContent = "None";
             });
         });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        // Load presets from server
+        fetch("/listpreset")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === 200 && data.data.presets) {
+              populatePresets(data.data.presets);
+            } else {
+              console.error("Failed to load presets");
+            }
+          })
+          .catch((err) => console.error("Error fetching presets:", err));
+
+        function populatePresets(presets) {
+          // Select all preset dropdowns
+          const presetSelects = document.querySelectorAll(".preset-select");
+
+          presetSelects.forEach((select) => {
+            // Clear existing options
+            select.innerHTML = "";
+
+            // Add a default option
+            const defaultOption = document.createElement("option");
+            defaultOption.textContent = "Select a preset";
+            defaultOption.value = "";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+
+            // Populate options with data
+            Object.entries(presets).forEach(([key, value]) => {
+              const option = document.createElement("option");
+              option.value = key;
+              option.textContent = value.plantName;
+              select.appendChild(option);
+            });
+          });
+        }
       });
     </script>
   </body>
