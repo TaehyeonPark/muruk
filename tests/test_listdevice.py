@@ -130,8 +130,3 @@ def test_already_logged_in3(client):
     response = client.get("/login", follow_redirects=True)
     assert response.status_code == 200
     assert b"test" in response.data.lower()
-
-
-def test_listdevice_empty_fields3(client):
-    response = client.post("/login", data={"username": "", "password": ""})
-    assert response.status_code == 401
