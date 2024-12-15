@@ -1,12 +1,13 @@
 {
-  "test": {
+  "test@test": {
     "device1": {
       "preset": "preset001",
       "temperature": 22,
       "moisture": 50,
       "light": 500,
       "lastwateredtime": "2024-12-15 10:30:00",
-      "scheduledlighting": "10:30",
+      "scheduledlighting": "10:30 ~ 19:00",
+      "noti": true,
       "history": [
         "[2024-12-15 10:30:00] - Watering event",
         "[2024-12-14 16:00:00] - Lighting event",
@@ -28,7 +29,8 @@
       "moisture": 20,
       "light": 1000,
       "lastwateredtime": "2024-12-14 16:00:00",
-      "scheduledlighting": "16:00",
+      "scheduledlighting": "11:00 ~ 17:00",
+      "noti": true,
       "history": [
         "[2024-12-14 16:00:00] - Watering event",
         "[2024-12-14 13:00:00] - Lighting event",

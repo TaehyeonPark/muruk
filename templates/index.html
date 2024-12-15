@@ -20,7 +20,88 @@
         margin-left: 10px;
       }
       .container {
-        max-width: 1250px; /* 원하는 만큼 늘려서 조정 (예: 1200px, 1400px 등) */
+        max-width: 800px; /* 원하는 만큼 늘려서 조정 (예: 1200px, 1400px 등) */
+      }
+      .device-card {
+        background-color: #f8f9fa; /* 연한 회색 배경 */
+        margin-bottom: 20px; /* 카드 사이 간격 */
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .device-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+      }
+      .device-actions button {
+        margin-right: 5px;
+      }
+      /* Switch Container */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+        margin: 0; /* 여백 제거 */
+        vertical-align: middle; /* 수직 정렬을 위해 추가 */
+      }
+
+      /* Flexbox 컨테이너 수정 */
+      .d-flex {
+        display: flex;
+        align-items: center; /* 수직 중앙 정렬 */
+      }
+
+      .d-flex span {
+        margin-right: 10px; /* 스위치와 텍스트 사이 간격 */
+      }
+
+      /* 기존 스위치 스타일 유지 */
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc; /* 기본 상태: 회색 */
+        transition: 0.4s;
+        border-radius: 24px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 4px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: #2196f3; /* ON 상태: 파란색 */
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(15px); /* 스위치 이동 */
+      }
+      #chart-container {
+        text-align: center; /* 타이틀과 그래프를 가운데 정렬 */
+        margin-top: 20px;
+      }
+      svg {
+        display: inline-block; /* SVG를 인라인 블록으로 정렬 */
       }
     </style>
   </head>
@@ -35,86 +116,85 @@
       </div>
       <h3>Your Devices</h3>
       {% if devices %}
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Device ID</th>
-            <th>Plant Name</th>
-            <th>Preset</th>
-            <th>Temperature (°C)</th>
-            <th>Moisture (%)</th>
-            <th>Light (lux)</th>
-            <th>Last Watered</th>
-            <th>Scheduled Light</th>
-            <!-- 새로 추가한 컬럼 -->
-            <th>Actions</th>
-            <th>History</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for device in devices %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ device.device_id }}</td>
-            <td>{{ device.plant_name }}</td>
-            <td>
+      <!-- 카드 형식으로 디바이스 정보 출력 -->
+      <div class="row">
+        {% for device in devices %}
+        <div class="col-12">
+          <div class="device-card">
+            <div class="device-header">
+              <strong>Device ID:</strong> {{ device.device_id }}
+            </div>
+            <div class="d-flex align-items-center mt-2">
+              <span class="mr-2"><strong>Notification:</strong></span>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  class="noti-toggle"
+                  data-device-id="{{ device.device_id }}"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <p><strong>Plant Name:</strong> {{ device.plant_name }}</p>
+            <p>
+              <strong>Preset to update:</strong>
               <select
                 class="form-control preset-select"
                 data-device-id="{{ device.device_id }}"
               >
-                <option value="" disabled selected>Select a preset</option>
+                <option value="" disabled selected>
+                  Currrent preset: {{ device.plant_name }}
+                </option>
                 <option value="preset001">Ficus</option>
                 <option value="preset002">Succulent</option>
                 <option value="preset003">Orchid</option>
                 <option value="preset004">Snake Plant</option>
                 <option value="preset005">Peace Lily</option>
               </select>
-            </td>
-            <td>{{ device.current_temp }}</td>
-            <td>{{ device.current_moisture }}</td>
-            <td>{{ device.current_light }}</td>
-            <td>{{ device.last_watered }}</td>
-            <td
-              class="scheduled-light-cell"
-              data-device-id="{{ device.device_id }}"
-            >
-              Loading...
-            </td>
-            <td>
-              <div class="btn-group" role="group" aria-label="Device Actions">
-                <button
-                  class="btn btn-primary btn-sm analyze-disease-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Analyze Disease
-                </button>
-                <button
-                  class="btn btn-success btn-sm water-plant-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Water Plant
-                </button>
-                <button
-                  class="btn btn-warning btn-sm light-schedule-btn"
-                  data-device-id="{{ device.device_id }}"
-                >
-                  Light Schedule
-                </button>
-              </div>
-            </td>
-            <td>
+            </p>
+            <p><strong>Temperature (°C):</strong> {{ device.current_temp }}</p>
+            <p><strong>Moisture (%):</strong> {{ device.current_moisture }}</p>
+            <p><strong>Light (lux):</strong> {{ device.current_light }}</p>
+            <p><strong>Last Watered:</strong> {{ device.last_watered }}</p>
+            <p>
+              <strong>Scheduled Light:</strong>
+              <span
+                class="scheduled-light-cell"
+                data-device-id="{{ device.device_id }}"
+                >Loading...</span
+              >
+            </p>
+            <div class="device-actions">
+              <button
+                class="btn btn-primary btn-sm analyze-disease-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Analyze Disease
+              </button>
+              <button
+                class="btn btn-success btn-sm water-plant-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Water Plant
+              </button>
+              <button
+                class="btn btn-warning btn-sm light-schedule-btn"
+                data-device-id="{{ device.device_id }}"
+              >
+                Light Schedule
+              </button>
               <button
                 class="btn btn-info btn-sm view-history-btn"
                 data-device-id="{{ device.device_id }}"
               >
                 View History
               </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
       {% else %}
       <div class="alert alert-warning">
         No devices found. <a href="/registerdevice">Register a device</a>
@@ -183,7 +263,7 @@
       aria-labelledby="historyModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="historyModalLabel">Device History</h5>
@@ -197,6 +277,22 @@
             </button>
           </div>
           <div class="modal-body">
+            <div id="chart-container">
+              <!-- Temperature Chart -->
+              <h6 class="text-center font-weight-bold">Temperature</h6>
+              <div id="tempChart"></div>
+
+              <!-- Humidity Chart -->
+              <h6 class="text-center font-weight-bold mt-4">Humidity</h6>
+              <div id="humidityChart"></div>
+
+              <!-- Light Intensity Chart -->
+              <h6 class="text-center font-weight-bold mt-4">Light Intensity</h6>
+              <div id="lightChart"></div>
+            </div>
+
+            <!-- Actions' History -->
+            <h6 class="text-center font-weight-bold mt-4">Actions' History</h6>
             <ul id="history-list" class="list-group"></ul>
           </div>
           <div class="modal-footer">
@@ -239,11 +335,20 @@
           <div class="modal-body">
             <form id="lightScheduleForm">
               <div class="form-group">
-                <label for="lightTime">Select time to turn on light:</label>
+                <label for="lightTimeStart"
+                  >Select time to turn on light:</label
+                >
                 <input
                   type="time"
                   class="form-control"
-                  id="lightTime"
+                  id="lightTimeStart"
+                  required
+                />
+                <label for="lightTimeEnd">Select time to turn off light:</label>
+                <input
+                  type="time"
+                  class="form-control"
+                  id="lightTimeEnd"
                   required
                 />
               </div>
@@ -273,7 +378,194 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // View History 버튼 이벤트 리스너
+        document.querySelectorAll(".view-history-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            const deviceId = button.getAttribute("data-device-id");
+            showHistoryModal(deviceId);
+          });
+        });
+
+        // 모달 열기 및 데이터 표시
+        function showHistoryModal(deviceId) {
+          const fakeData = generateFakeData();
+
+          // Draw D3 charts
+          drawD3Chart(
+            "tempChart",
+            fakeData.labels,
+            fakeData.temp,
+            "Temperature (°C)"
+          );
+          drawD3Chart(
+            "humidityChart",
+            fakeData.labels,
+            fakeData.humidity,
+            "Humidity (%)"
+          );
+          drawD3Chart(
+            "lightChart",
+            fakeData.labels,
+            fakeData.light,
+            "Light Intensity (lux)"
+          );
+
+          // Update Actions' History
+          const historyListElement = document.getElementById("history-list");
+          const historyList = [
+            "[2024-12-14 16:00] - Watering event",
+            "[2024-12-14 13:00] - Lighting event",
+            "[2024-12-13 11:45] - Fertilizer added",
+            "[2024-12-12 09:30] - General maintenance check",
+          ];
+          historyListElement.innerHTML = historyList
+            .map((item) => `<li class="list-group-item">${item}</li>`)
+            .join("");
+
+          $("#historyModal").modal("show");
+        }
+
+        // 가짜 데이터 생성 함수
+        function generateFakeData() {
+          const labels = Array.from({ length: 10 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (10 - i)); // 10일 전부터 오늘까지
+            return date;
+          });
+          const temp = Array.from(
+            { length: 10 },
+            () => Math.floor(Math.random() * 15) + 15
+          );
+          const humidity = Array.from(
+            { length: 10 },
+            () => Math.floor(Math.random() * 50) + 30
+          );
+          const light = Array.from(
+            { length: 10 },
+            () => Math.floor(Math.random() * 500) + 500
+          );
+          return { labels, temp, humidity, light };
+        }
+
+        // D3.js 차트 그리기 함수
+        function drawD3Chart(containerId, labels, data, label) {
+          const width = 600;
+          const height = 300;
+          const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+          // Clear previous chart
+          d3.select(`#${containerId}`).html("");
+
+          // Scale 설정
+          const x = d3
+            .scaleTime()
+            .domain(d3.extent(labels))
+            .range([margin.left, width - margin.right]);
+
+          const y = d3
+            .scaleLinear()
+            .domain([0, d3.max(data)])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+          // SVG 컨테이너 생성
+          const svg = d3
+            .select(`#${containerId}`)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .style("max-width", "100%")
+            .style("height", "auto");
+
+          // X축 추가
+          svg
+            .append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(
+              d3
+                .axisBottom(x)
+                .ticks(width / 80)
+                .tickSizeOuter(0)
+            );
+
+          // Y축 추가
+          svg
+            .append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y).ticks(height / 40));
+
+          // 라인 생성
+          const line = d3
+            .line()
+            .x((d, i) => x(labels[i]))
+            .y((d) => y(d));
+
+          svg
+            .append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+          // 라벨 추가
+          svg
+            .append("text")
+            .attr("x", margin.left)
+            .attr("y", margin.top - 5)
+            .attr("fill", "black")
+            .attr("text-anchor", "start")
+            .text(label);
+        }
+      });
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggles = document.querySelectorAll(".noti-toggle");
+
+        // Fetch current notification status
+        toggles.forEach((toggle) => {
+          const deviceId = toggle.dataset.deviceId;
+
+          fetch(`/noti/${deviceId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === 200 && data.data.result !== null) {
+                toggle.checked = data.data.result === "true";
+              }
+            })
+            .catch((error) =>
+              console.error("Error fetching notification status:", error)
+            );
+        });
+
+        // Handle toggle change
+        toggles.forEach((toggle) => {
+          toggle.addEventListener("change", () => {
+            const deviceId = toggle.dataset.deviceId;
+            const newStatus = toggle.checked ? "true" : "false";
+
+            fetch(`/setnoti/${deviceId}?noti=${newStatus}`)
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.status === 200) {
+                  alert(
+                    `Notification turned ${newStatus === "true" ? "ON" : "OFF"}`
+                  );
+                } else {
+                  alert("Failed to update notification.");
+                  toggle.checked = !toggle.checked; // Revert toggle state on failure
+                }
+              })
+              .catch((error) => {
+                console.error("Error updating notification:", error);
+                toggle.checked = !toggle.checked; // Revert toggle state on error
+              });
+          });
+        });
+      });
+
       document.addEventListener("DOMContentLoaded", () => {
         // Generic function to handle actions
         function handleAction(url, modalTitle, updateModal = false) {
@@ -416,7 +708,7 @@
             const selectedPreset = select.value;
 
             if (!selectedPreset) {
-              alert("Please select a preset.");
+              alert("Please select a preset to update.");
               return;
             }
 
@@ -448,17 +740,19 @@
             const deviceId = document.getElementById(
               "lightScheduleDeviceId"
             ).value;
-            const lightTime = document.getElementById("lightTime").value;
+            const lightTimeStart =
+              document.getElementById("lightTimeStart").value;
+            const lightTimeEnd = document.getElementById("lightTimeEnd").value;
 
-            if (!lightTime) {
+            if (!lightTimeStart || !lightTimeEnd) {
               alert("Please select a time.");
               return;
             }
 
             fetch(
-              `/lightschedule/${deviceId}?time=${encodeURIComponent(
-                lightTime
-              )}`,
+              `/lightschedule/${deviceId}?start=${encodeURIComponent(
+                lightTimeStart
+              )}&end=${encodeURIComponent(lightTimeEnd)}`,
               {
                 method: "GET",
                 headers: {

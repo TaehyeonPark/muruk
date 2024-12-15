@@ -2,46 +2,87 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up</title>
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <style>
+      body {
+        background-color: #f8f9fa; /* 연한 회색 배경 */
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .signup-card {
+        width: 100%;
+        max-width: 400px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .signup-card h2 {
+        margin-bottom: 20px;
+        font-weight: bold;
+        color: #333333;
+      }
+
+      .signup-card .form-control {
+        border-radius: 8px;
+      }
+
+      .signup-card .btn {
+        border-radius: 8px;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .go-to-login {
+        margin-top: 15px;
+        display: block;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .go-to-login:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
-    <div class="container mt-5">
+    <div class="signup-card">
       <h2>Sign Up</h2>
       <form method="POST" action="/signup">
         <div class="form-group">
-          <label for="username">Username</label>
           <input
-            type="text"
+            type="email"
             class="form-control"
             id="username"
             name="username"
+            placeholder="User email"
             required
           />
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
           <input
             type="password"
             class="form-control"
             id="password"
             name="password"
+            placeholder="Password"
             required
           />
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          onclick="location.href='/login'"
-        >
-          Go to Login
-        </button>
+        <a href="/login" class="btn btn-outline-secondary">Go to Login</a>
       </form>
     </div>
 
